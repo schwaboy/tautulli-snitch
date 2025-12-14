@@ -29,8 +29,10 @@ A Python script to analyze Tautulli users by unique devices and IP addresses, ma
 
 3. Install dependencies:
    ```bash
-   poetry install
+   poetry install --no-root
    ```
+   
+   > **Note**: This project uses Poetry in dependency-only mode (`package-mode = false` in `pyproject.toml`) since it's a standalone script rather than an installable package.
 
 4. Create a `.env` file based on `.env.example`:
    ```bash
@@ -49,13 +51,13 @@ A Python script to analyze Tautulli users by unique devices and IP addresses, ma
 
 ```bash
 # Default: sort by devices (descending)
-poetry run python tautulli.py
+poetry run python snitch.py
 
 # Sort by name (ascending)
-poetry run python tautulli.py --sort name
+poetry run python snitch.py --sort name
 
 # Sort by unique IPs (descending)  
-poetry run python tautulli.py --sort ips
+poetry run python snitch.py --sort ips
 ```
 
 **Output example:**
@@ -70,7 +72,7 @@ User2                        32         12
 
 ```bash
 # Show detailed stats for specific user
-poetry run python tautulli.py --user someusername
+poetry run python snitch.py --user someusername
 ```
 
 **Output example:**
