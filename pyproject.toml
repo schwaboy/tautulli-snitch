@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "tautulli-snitch"
-version = "0.1.0"
+version = "0.1.2"
 description = "A tool to analyze and report on Tautulli user activity and device information"
 authors = ["Your Name <you@example.com>"]
 readme = "README.md"
