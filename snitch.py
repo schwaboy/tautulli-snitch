@@ -4,6 +4,7 @@ import requests
 from collections import defaultdict
 from dotenv import load_dotenv
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 # Load environment variables from .env
 load_dotenv()
@@ -12,7 +13,7 @@ TAUTULLI_URL = os.getenv("TAUTULLI_URL")
 API_KEY = os.getenv("TAUTULLI_API_KEY")
 
 
-def call_tautulli(cmd, params=None):
+def call_tautulli(cmd: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     if params is None:
         params = {}
 
@@ -36,13 +37,13 @@ def call_tautulli(cmd, params=None):
     return response
 
 
-def get_users():
+def get_users() -> List[Dict[str, Any]]:
     resp = call_tautulli("get_user_names")
     data = resp.get("data")
     return data if isinstance(data, list) else []
 
 
-def get_user_player_stats(user_id):
+def get_user_player_stats(user_id: int) -> List[Dict[str, Any]]:
     resp = call_tautulli("get_user_player_stats", {"user_id": user_id})
     data = resp.get("data")
     if isinstance(data, dict) and "players" in data:
@@ -53,7 +54,7 @@ def get_user_player_stats(user_id):
     return []
 
 
-def get_user_ips(user_id):
+def get_user_ips(user_id: int) -> List[Dict[str, Any]]:
     # get_user_ips for summary mode (per-user IP table)[file:1]
     resp = call_tautulli(
         "get_user_ips",
@@ -72,7 +73,7 @@ def get_user_ips(user_id):
     return []
 
 
-def device_label_from_entry(entry):
+def device_label_from_entry(entry: Dict[str, Any]) -> str:
     fields = [
         entry.get("player"),
         entry.get("product"),
@@ -83,7 +84,7 @@ def device_label_from_entry(entry):
     return " / ".join(parts) or "Unknown device"
 
 
-def build_summary_results():
+def build_summary_results() -> List[Dict[str, Any]]:
     """Summary mode: per-user devices + unique IPs using player stats and user IP table."""
     users = get_users()
     print(f"Found {len(users)} users")
@@ -133,7 +134,7 @@ def build_summary_results():
     return results
 
 
-def get_user_history_rows(user_id, max_rows=100000):
+def get_user_history_rows(user_id: int, max_rows: int = 100000) -> List[Dict[str, Any]]:
     """
     Use get_history filtered by user_id to retrieve that user's play history.
     This is the same data the web UI shows on the user's History tab.[file:1][web:21]
@@ -156,7 +157,7 @@ def get_user_history_rows(user_id, max_rows=100000):
     return []
 
 
-def fmt_ts(ts):
+def fmt_ts(ts: Any) -> str:
     if not ts:
         return "unknown"
     try:
@@ -165,7 +166,7 @@ def fmt_ts(ts):
         return str(ts)
 
 
-def build_user_detail(user_filter):
+def build_user_detail(user_filter: str) -> List[Dict[str, Any]]:
     """
     Detailed mode for a specific user:
     - Uses get_history(user_id=...) to derive per-IP and per-device stats.[file:1][web:21]
@@ -195,7 +196,7 @@ def build_user_detail(user_filter):
     return matches
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Tautulli user devices and IPs report"
     )
