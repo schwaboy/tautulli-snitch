@@ -157,6 +157,22 @@ def get_user_history_rows(user_id: int, max_rows: int = 100000) -> List[Dict[str
     return []
 
 
+def get_user_last_activity(user_id: int) -> int:
+    """
+    Get the timestamp of a user's most recent play.
+    Returns 0 if no history found.
+    """
+    try:
+        rows = get_user_history_rows(user_id, max_rows=1)
+        if rows and len(rows) > 0:
+            row = rows[0]
+            ts = row.get("date") or row.get("started") or row.get("stopped") or 0
+            return int(ts) if ts else 0
+    except Exception:
+        pass
+    return 0
+
+
 def fmt_ts(ts: Any) -> str:
     if not ts:
         return "unknown"
@@ -164,6 +180,56 @@ def fmt_ts(ts: Any) -> str:
         return datetime.fromtimestamp(int(ts)).isoformat(sep=" ", timespec="seconds")
     except (OSError, OverflowError, ValueError, TypeError):
         return str(ts)
+
+
+def validate_days_input(days: str) -> int:
+    """
+    Validate and sanitize days input.
+    Must be a positive integer between 1 and 36500 (100 years).
+    """
+    try:
+        days_int = int(days)
+    except (ValueError, TypeError):
+        raise ValueError("Days must be an integer")
+    
+    if days_int < 1:
+        raise ValueError("Days must be at least 1")
+    
+    if days_int > 36500:
+        raise ValueError("Days must be 36500 or less")
+    
+    return days_int
+
+
+def build_inactive_users(days: int) -> List[Dict[str, Any]]:
+    """
+    Find users who haven't had any plays in the last N days.
+    """
+    now = datetime.now().timestamp()
+    cutoff_timestamp = now - (days * 86400)  # 86400 seconds in a day
+    
+    users = get_users()
+    print(f"Checking {len(users)} users for inactivity in the last {days} days...")
+    
+    inactive = []
+    for user in users:
+        user_id = user.get("user_id")
+        name = user.get("friendly_name") or user.get("username") or f"User {user_id}"
+        
+        try:
+            last_activity = get_user_last_activity(user_id)
+            if last_activity == 0 or last_activity < cutoff_timestamp:
+                last_seen = fmt_ts(last_activity) if last_activity > 0 else "Never"
+                inactive.append({
+                    "user_id": user_id,
+                    "name": name,
+                    "last_activity": last_activity,
+                    "last_seen": last_seen,
+                })
+        except Exception as e:
+            print(f"[WARNING] Could not get activity for {name} ({user_id}): {e}")
+    
+    return inactive
 
 
 def build_user_detail(user_filter: str) -> List[Dict[str, Any]]:
@@ -213,9 +279,39 @@ def main() -> None:
             "(matches friendly_name or username, case-insensitive)"
         ),
     )
+    parser.add_argument(
+        "--inactive",
+        type=str,
+        help="List users who haven't had a play in the last N days (1-36500)",
+    )
     args = parser.parse_args()
 
-    if args.user:
+    if args.inactive:
+        # Inactive users: find users with no activity in the last N days
+        try:
+            days = validate_days_input(args.inactive)
+        except ValueError as e:
+            print(f"[ERROR] Invalid days input: {e}")
+            return
+        
+        inactive_users = build_inactive_users(days)
+        if not inactive_users:
+            print(f"No inactive users found in the last {days} days.")
+            return
+        
+        # Sort by last activity (oldest first)
+        inactive_users.sort(key=lambda x: x["last_activity"])
+        
+        print(f"\nFound {len(inactive_users)} inactive user(s) in the last {days} days:")
+        print(f"\n{'User':30} {'Last Seen':35}")
+        print("-" * 70)
+        for user in inactive_users:
+            print(
+                f"{user['name'][:28]:30} {user['last_seen']:35}"
+            )
+        print("-" * 70)
+
+    elif args.user:
         # Detailed: per-IP and per-device stats via get_history
         user_matches = build_user_detail(args.user)
         print(f"Found {len(user_matches)} user(s) matching {args.user!r}")

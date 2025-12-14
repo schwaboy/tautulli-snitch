@@ -87,6 +87,33 @@ User: Some User (ID: 12345)
     - iPhone / iOS       (plays: 89, last_seen: 2025-12-13 22:17:09)
 ```
 
+### Inactive Users Report
+
+```bash
+# Find users who haven't had a play in the last N days
+poetry run python snitch.py --inactive 30
+
+# Find users inactive for 90 days
+poetry run python snitch.py --inactive 90
+```
+
+**Output example:**
+```
+Found 3 inactive user(s) in the last 30 days:
+
+User                          Last Seen
+----------------------------------------------------------------------
+User3                         2025-11-01 14:23:45
+User4                         2025-10-15 09:12:33
+User5                         Never
+----------------------------------------------------------------------
+```
+
+**Notes:**
+- Days must be between 1 and 36500 (100 years)
+- Input is validated to ensure it's a positive integer
+- Users with "Never" as last_seen have no history in Tautulli
+
 ## 🔧 How It Works
 
 ### Summary Mode
