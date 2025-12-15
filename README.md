@@ -1,6 +1,6 @@
-# Tautulli User Devices & IPs Reporter
+# Tautulli Snitch
 
-A Python script to analyze Tautulli users by unique devices and IP addresses, matching the web UI's user history table.
+A Python script to analyze Tautulli user usage. Display unique IP addresses, device usage, and inactive users based on play history.
 
 ## ✨ Features
 
