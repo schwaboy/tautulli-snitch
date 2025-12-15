@@ -1,4 +1,4 @@
-# Tautulli Snitch
+# Tautulli Snitch 🫵
 
 A Python script to analyze Tautulli user usage. Display unique IP addresses, device usage, and inactive users based on play history.
 
