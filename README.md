@@ -24,6 +24,10 @@ A Python script to analyze Tautulli users by unique devices and IP addresses, ma
 
 2. Install Poetry if you haven't already:
    ```bash
+   brew install poetry
+   ```
+   OR
+   ```bash
    curl -sSL https://install.python-poetry.org | python3 -
    ```
 
