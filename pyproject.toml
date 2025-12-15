@@ -2,7 +2,7 @@
 name = "tautulli-snitch"
 version = "0.2.1"
 description = "A tool to analyze and report on Tautulli user activity and device information"
-authors = ["Your Name <you@example.com>"]
+authors = ["Let's be honest. GitHub CoPilot wrote this."]
 readme = "README.md"
 package-mode = false
 
